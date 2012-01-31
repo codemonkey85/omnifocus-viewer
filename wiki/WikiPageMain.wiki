@@ -11,6 +11,20 @@ This project aims to create a set of open-source tools to allow interaction with
 = Details =
 
 ==OmniFocus File Formats==
+OmniFocus stores its files in a hybrid scheme, using both text-based XML and SQLite databases.
+===XML files===
+The Omni group has chosen an interesting methods to save your information. Their database is really comprised of a set of "state-change" files. Every single change that you perform on your projects will create one small XML file that contains a description of that change. All of these files are required to build a snapshot of the latest status of your projects and tasks. 
+You can find them at ~/Library/Application\ Support/OmniFocus/OmniFocus.ofocus.
+
+When you first go to this location on Finder you see one file, but if you right-click and select "show package contents", you can see a long list of zip files (mine currently has around 1900 files and growing) with the following naming convention: 
+
+{date in GMT}={randomID}+{randomID}.zip
+
+example: 20120130173023=cmwqHtJTxUo+nAGRGnNbwfw.zip
+
+The randomIDs are generated to figure out which file is created after another. Since OmniFocus supports a distributed change model, it cannot simply rely on accessing the file sorted based on their modification date, and thus that naming convention is used. 
+Each of these zip files contains a "contents.xml" file, which is in standard text format. You can open and view the contents, and perhaps find the name of some of your tasks along with date information (date created, date modified, date due, etc.) among other things. There are also random task IDs that don't make much sense by their own, but once you look at the 
+
 
 ==Project phases==
 There are two phases for this project.
