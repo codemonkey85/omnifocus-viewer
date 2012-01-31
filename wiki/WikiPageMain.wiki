@@ -53,7 +53,7 @@ Granted, this is not a very elegant solution and is only considered as a stop-ga
 
 Once the SQLite database is downloaded into the phone, it can be opened and the information inside is displayed. Android already supports SQLite through android.database.sqlite package. For example, we can use the following SQL statements: 
 
----
+----
 SELECT persistentIdentifier,name,numberOfAvailableTasks FROM Folder     ==> Get the list of folders
 SELECT name FROM Folder 					 		 ==> Get the list of folders
 
@@ -74,7 +74,7 @@ SELECT name, dateDue FROM Task WHERE Task.isOverDue = 1
 
 Example : Find all due or soon to overdue tasks: 
 SELECT name FROM Task WHERE Task.isDueSoon = 1 OR Task.isOverDue = 1
----
+----
 
 The final part of the first phase is developing an Android APP that gets the returned information from the SELECT statement. 
 
