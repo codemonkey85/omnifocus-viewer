@@ -1,0 +1,20 @@
+#summary A tool to allow viewing omnifocus projects and tasks in non-Apple platforms
+
+= Introduction =
+
+*OmniFocus* is a great organizing tool, there is no doubt about it. It integrates greatly with a Mac computer, and there are very good iPad and iPhone applications to allow you to work on your projects and tasks no matter where you are.
+
+But, there is no client for Windows, Linux, Android or any other platform. Users have asked the Omni Group, unsuccessfully, for years to expand their clients but the good folks at Omni have decided to keep their efforts limited to Apple platforms. The good news is that the folks at Omni have said a few times in forums that they have chosen an open format for their file storage, and they consider a user's data to belong to the user.
+
+This project aims to create a set of open-source tools to allow interaction with your OmniFoucs tasks on *non-Apple platforms*. The language of the choice is _Java_, since its first platform are Android phones
+
+= Details =
+
+==OmniFocus File Formats==
+
+==Project phases==
+There are two phases for this project.
+
+===Phase 1: Using the SQLite database from OmniFocus Mac===
+
+===Phase 2: Creating the SQLite database locally from XML updates==
