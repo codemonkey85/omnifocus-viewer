@@ -1,3 +1,5 @@
+#You can download the first Alpha version (0.1) here. 
+
 = Alpha version (0.1) now available for download and testing =
 
 *Version 0.1 (alpha stage) is now ready for download and testing. *
