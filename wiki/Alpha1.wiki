@@ -1,4 +1,4 @@
-#You can download the first Alpha version (0.1) here. 
+#summary You can download the first Alpha version (0.1) here.
 
 = Alpha version (0.1) now available for download and testing =
 
