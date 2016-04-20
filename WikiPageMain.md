@@ -1,0 +1,87 @@
+# Introduction #
+
+**OmniFocus** is a great organizing tool, there is no doubt about it. It integrates greatly with a Mac computer, and there are very good iPad and iPhone applications to allow you to work on your projects and tasks no matter where you are.
+
+But, there is no client for Windows, Linux, Android or any other platform. Users have asked the Omni Group, unsuccessfully, for years to expand their clients but the good folks at Omni have decided to keep their efforts limited to Apple platforms. The good news is that the folks at Omni have said a few times in forums that they have chosen an open format for their file storage, and they consider a user's data to belong to the user.
+
+This project aims to create a set of open-source tools to allow interaction with your OmniFoucs tasks on **non-Apple platforms**. The language of the choice is _Java_, since its first platform are Android phones
+
+# Details #
+
+## OmniFocus File Formats ##
+OmniFocus stores its files in a hybrid scheme, using both text-based XML and SQLite databases.
+### XML files ###
+The Omni group has chosen an interesting methods to save your information. Their database is really comprised of a set of "state-change" files. Every single change that you perform on your projects will create one small XML file that contains a description of that change. All of these files are required to build a snapshot of the latest status of your projects and tasks.
+You can find them at ~/Library/Application\ Support/OmniFocus/OmniFocus.ofocus
+
+When you first go to this location on Finder you see one file, but if you right-click and select "show package contents", you can see a long list of zip files (mine currently has around 1900 files and growing) with the following naming convention:
+
+{date in GMT}={randomID}+{randomID}.zip
+
+example: 20120130173023=cmwqHtJTxUo+nAGRGnNbwfw.zip
+
+The randomIDs are generated to figure out which file is created after another. Since OmniFocus supports a distributed change model, it cannot simply rely on accessing the file sorted based on their modification date, and thus that naming convention is used.
+Each of these zip files contains a "contents.xml" file, which is in standard text format. You can open and view the contents, and perhaps find the name of some of your tasks along with date information (date created, date modified, date due, etc.) among other things. There are also random task IDs that don't make much sense by their own, but once you look at the SQLite database it becomes obvious.
+
+These XML files are the only information that are "synced". Each OmniFocus client (Mac, iPad or iOS) knows how to modify its local state (see below, the SQLite database) using these snippets of information.
+### SQLite Database ###
+The second file used by OmniFocus is an SQLite database, which can be found at ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
+
+As you can see, OmniFocus considers the SQLite database as a cache; in fact this database can always be recreated by any version of OmniFocus (Mac, iPad or iPhone) just by processing the XML files.
+
+The SQLite database represents the "state" of OmniFocus. Its file size is usually larger than a single XML file. For example my current SQLite file is about 150 KB, while each XML file is around 4 KB. This has been one of the major reasons for the Omni Group to choose this model: Ease of synching with small files, while each client has its own SQL database for fast processing.
+
+This file is stored in standard SQLite format, and can be opened by any SQLite browser, for example http://sourceforge.net/projects/sqlitebrowser/
+
+## Project phases ##
+There are two phases for this project.
+
+### Phase 1: Using the SQLite database from OmniFocus Mac ###
+In the first phase of the project we rely on the local SQLite database of the Mac client, bypassing the XML state modification process.
+
+The SQLite database of the Mac client, which can be found at ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2 , is periodically copied over to a web or FTP server on the web. Our client application downloads this file from the web (or FTP) and uses it to give the user a view of the folders, projects, tasks, due tasks, etc.
+
+In this phase, our client has read-only access to the database.
+
+For copying the SQLite database, we use a 'cron' job that runs every 5 or 10 minutes, running a shell script. In the shell script we first look at the _modified_ date of this file. If it has been modified in the past 5 (or 10) minutes, we simply use ftp -put to upload the file to an ftp server (there are many free ftp servers out there).
+
+On the client side, once the application starts it uses the org.apache.commons.net.ftp.FTPClient class to download the SQLite file onto the cellphone.
+
+Granted, this is not a very elegant solution and is only considered as a stop-gap measure to get the ball rolling, and is intended to be removed once the phase 2 of the project is completed.
+
+Once the SQLite database is downloaded into the phone, it can be opened and the information inside is displayed. Android already supports SQLite through android.database.sqlite package. For example, we can use the following SQL statements:
+
+
+---
+
+SELECT persistentIdentifier,name,numberOfAvailableTasks FROM Folder     ==> Get the list of folders
+SELECT name FROM Folder 					 		 ==> Get the list of folders
+
+SELECT persistentIdentifier,name,numberOfAvailableTasks FROM Folder WHERE name LIKE "Teach"
+
+Get a list of all projects:
+SELECT name FROM Task,ProjectInfo WHERE Task.persistentIdentifier = ProjectInfo.pk
+
+Example: being presented with a list of folders, the user has selected a folder with some ID, say kziSK5zhaGY. Find the list of projects in this folder.
+SELECT name FROM Task,ProjectInfo WHERE Task.persistentIdentifier = ProjectInfo.pk AND ProjectInfo.folder =  "kziSK5zhaGY"
+
+Example: Being presented with a list of projects (in a certain folder), the user has picked a project with some id, say a9oRiASZt9M. Find the list of tasks.
+SELECT name FROM Task WHERE Task.parent =  "a9oRiASZt9M"
+
+Example: Find the list of all task that are overdue:
+SELECT name FROM Task WHERE Task.isOverDue = 1
+SELECT name, dateDue FROM Task WHERE Task.isOverDue = 1
+
+Example : Find all due or soon to overdue tasks:
+SELECT name FROM Task WHERE Task.isDueSoon = 1 OR Task.isOverDue = 1
+
+---
+
+
+The final part of the first phase is developing an Android APP that gets the returned information from the SELECT statement.
+
+This tutorial might be useful:
+http://www.vogella.de/articles/AndroidSQLite/article.html#sqliteoverview_listviews
+
+### Phase 2: Creating the SQLite database locally from XML updates ###
+In this phase, we rely on the client code developed in the previous phase, but instead of copying the whole SQLite database file we only use the latest XML files to create our own local cache of the state in the form of an SQLite database.
